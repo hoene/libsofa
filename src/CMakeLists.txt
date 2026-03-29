@@ -114,56 +114,6 @@ set(PKG_CONFIG_PRIVATELIBS
     "${PKG_CONFIG_PRIVATELIBS}"
     PARENT_SCOPE)
 
-# determine if working with 32 or 64 bit compiler
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-    message(STATUS "Target is 64 bits")
-    set(SOFA_EXT_LIB_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/win64"
-        CACHE FILEPATH "description")
-  else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-    message(STATUS "Target is 32 bits")
-    set(SOFA_EXT_LIB_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/win32"
-        CACHE FILEPATH "description")
-  endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-  # additional shipped dependencies on windows
-  find_library(SZ_LIB szip HINTS ${SOFA_EXT_LIB_PATH})
-  find_library(M_LIB m ${SOFA_EXT_LIB_PATH})
-  find_library(DL_LIB dl ${SOFA_EXT_LIB_PATH})
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  # set(SOFA_EXT_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/linux"
-  # CACHE FILEPATH "description") additional dependencies on linux, should be on
-  # system find_library(SZ_LIB szip) #linux library is compiled without szlib
-  # support
-  find_library(M_LIB m)
-  find_library(DL_LIB dl)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(SOFA_EXT_LIB_PATH
-      "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/macos"
-      CACHE FILEPATH "description")
-  # additional dependencies on linux, should be on system find_library(SZ_LIB
-  # szip) #macos library is compiled without szlib support
-  find_library(M_LIB m)
-  find_library(DL_LIB dl)
-else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  message(
-    SEND_ERROR
-      "Unknown system name (does not equal Windows, linux or Darwin [Mac OS X])"
-  )
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-
-# set (SOFA_EXT_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
-# CACHE FILEPATH "description")
-
-# Shipped libraries find_library(HDF5_LIB hdf5 HINTS ${SOFA_EXT_LIB_PATH})
-# find_library(HDF5_HL_LIB hdf5_hl HINTS ${SOFA_EXT_LIB_PATH})
-# find_library(NETCDF_LIB netcdf HINTS ${SOFA_EXT_LIB_PATH})
-find_library(NETCDF_CXX_LIB netcdf_c++4)
-# find_library(Z_LIB z HINTS ${SOFA_EXT_LIB_PATH})
-
-# include_directories(${SOFA_EXT_INCLUDE_PATH})
-
 add_library(
   sofa STATIC
   SOFAAPI.cpp
@@ -215,6 +165,58 @@ add_library(
   SOFAUnits.cpp
   SOFAUnits.h
   SOFAVersion.h)
+
+# determine if working with 32 or 64 bit compiler
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  target_link_libraries(sofa winmm)
+  if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+    message(STATUS "Target is 64 bits")
+    set(SOFA_EXT_LIB_PATH
+        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/win64"
+        CACHE FILEPATH "description")
+  else("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+    message(STATUS "Target is 32 bits")
+    set(SOFA_EXT_LIB_PATH
+        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/win32"
+        CACHE FILEPATH "description")
+  endif("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+  # additional shipped dependencies on windows
+  find_library(SZ_LIB szip HINTS ${SOFA_EXT_LIB_PATH})
+  find_library(M_LIB m ${SOFA_EXT_LIB_PATH})
+  find_library(DL_LIB dl ${SOFA_EXT_LIB_PATH})
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  # set(SOFA_EXT_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/linux"
+  # CACHE FILEPATH "description") additional dependencies on linux, should be on
+  # system find_library(SZ_LIB szip) #linux library is compiled without szlib
+  # support
+  find_library(M_LIB m)
+  find_library(DL_LIB dl)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(SOFA_EXT_LIB_PATH
+      "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/macos"
+      CACHE FILEPATH "description")
+  # additional dependencies on linux, should be on system find_library(SZ_LIB
+  # szip) #macos library is compiled without szlib support
+  find_library(M_LIB m)
+  find_library(DL_LIB dl)
+else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  message(
+    SEND_ERROR
+      "Unknown system name (does not equal Windows, linux or Darwin [Mac OS X])"
+  )
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+# set (SOFA_EXT_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
+# CACHE FILEPATH "description")
+
+# Shipped libraries find_library(HDF5_LIB hdf5 HINTS ${SOFA_EXT_LIB_PATH})
+# find_library(HDF5_HL_LIB hdf5_hl HINTS ${SOFA_EXT_LIB_PATH})
+# find_library(NETCDF_LIB netcdf HINTS ${SOFA_EXT_LIB_PATH})
+find_library(NETCDF_CXX_LIB netcdf_c++4)
+# find_library(Z_LIB z HINTS ${SOFA_EXT_LIB_PATH})
+
+# include_directories(${SOFA_EXT_INCLUDE_PATH})
+
 target_link_libraries(sofa ${NETCDF_CXX_LIB})
 
 add_executable(sofainfo sofainfo.cpp)
